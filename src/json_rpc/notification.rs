@@ -8,13 +8,17 @@ use crate::types::EdenPendingTx;
 
 #[derive(Debug, Clone)]
 pub enum EdenItem {
+    /// Response on subscribe
     Response(Response),
+    /// Stream msg
     Notification(EdenNotification),
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct EdenNotification {
+    /// Subscription number
     pub subscription: u64,
+    /// Streamed msg
     pub result: EdenPendingTx,
 }
 
@@ -115,7 +119,7 @@ mod tests {
 
     #[test]
     fn deser_notification_test() -> Result<()> {
-        // EDEN URL
+        // https://docs.edennetwork.io/eden-mempool-streaming-service/websockets
         let notification = r#"{"jsonrpc":"2.0","method":"subscription","params":{"subscription":4815270595554998,"result":{"type":"0x2","hash":"0xd2bd5a7fa523f13e7f955c0753cd2f1de0635b6c165c2494aae44d8bbdd9a9c6","from":"0x19450678803d6a7bb6897ca1e793a071a100cba7","nonce":"0x2","gasLimit":"0x7a120","to":"0x19c10fff96b80208f454034c046ccc4445cd20ba","data":"0x886f9ece000000000000000000000000000000000000000000000000083019dfc17b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000659f3fdb00000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000041c63f9a4c2d53866c5a88bd5dfceab7c4ac0733b1d2b788ec9293bbaffc8f031b1ce884faad136a6a9dca6b60ccab9f13d82c492c7414b0a66a518c7a36f8ade01b00000000000000000000000000000000000000000000000000000000000000","v":"0x26","r":"0xe6e52e08bf9735e38c1808285269afef6b82d500cd5a90966479b5f8fa70e623","s":"0x21490c9a52a60b2c3a5a6045d687dbe8a5e710274aa3071b813a1bf24271eb45","value":"0x83019dfc17b0000","chainId":"0x1","accessList":[],"maxPriorityFeePerGas":"0x2faf080","maxFeePerGas":"0xc570bd200"}}}"#;
 
         let deser = serde_json::from_str::<EdenItem>(notification)?;
@@ -136,7 +140,7 @@ mod tests {
 
     #[test]
     fn deser_response_test() -> Result<()> {
-        // EDEN URL
+        // https://docs.edennetwork.io/eden-mempool-streaming-service/websockets
         let response = r#"{"jsonrpc":"2.0","result":4815270595554998,"id":1}"#;
 
         let deser = serde_json::from_str::<EdenItem>(response)?;
@@ -154,7 +158,7 @@ mod tests {
 
     #[test]
     fn deser_error_test() -> Result<()> {
-        // EDEN URL
+        // https://docs.edennetwork.io/eden-mempool-streaming-service/websockets
         let error =
             r#"{"jsonrpc":"2.0","error":{"code":-32700,"message":"Parse error"},"id":null}"#;
 
