@@ -10,10 +10,11 @@ use url::Url;
 
 use crate::{json_rpc::notification::EdenItem, types::EdenPendingTx};
 
-// declare types
+// declare type aliases
 pub type TungsteniteStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
 pub type Writer = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;
 
+/// Eden Mempool Client
 pub struct Client {
     pub(crate) url: Url,
 }
@@ -39,9 +40,7 @@ impl Client {
     }
 
     /// subscribes and returns stream of `EdenPedningTx`
-    pub async fn subscribe_txs(
-        &self,
-    ) -> Result<std::pin::Pin<Box<UnboundedReceiverStream<EdenPendingTx>>>> {
+    pub async fn subscribe_txs(&self) -> Result<UnboundedReceiverStream<EdenPendingTx>> {
         let req = self.url.clone().into_client_request()?;
         let (tx, rx) = mpsc::unbounded_channel();
 
@@ -100,7 +99,7 @@ impl Client {
             eyre::Ok(())
         });
 
-        Ok(Box::pin(UnboundedReceiverStream::new(rx)))
+        Ok(UnboundedReceiverStream::new(rx))
     }
 }
 
@@ -114,13 +113,11 @@ mod tests {
     #[tokio::test]
     async fn test_txs_subscription() {
         let url = Url::parse(MEMPOOL_WS).unwrap();
-
         let client = Client::new(url);
 
         let mut stream = client.subscribe_txs().await.unwrap();
+        let pedning_tx = stream.next().await;
 
-        while let Some(msg) = stream.next().await {
-            dbg!(msg);
-        }
+        assert!(pedning_tx.is_some());
     }
 }
